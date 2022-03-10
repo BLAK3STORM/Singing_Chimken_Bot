@@ -17,4 +17,4 @@ As lavalink is written in java, a **JDK** is required to run it. Download **Open
 Download *Lavalink* from [here](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1).
 
 Everytime before running the bot lavalink will be required to run. Use the following command to do so:
-```lavalink_path/java -jar Lavalink.jar```
+```java -jar lavalink_path/Lavalink.jar```
