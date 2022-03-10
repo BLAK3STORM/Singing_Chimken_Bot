@@ -3,7 +3,7 @@ A fully functional discord music bot. All codes are given here. This is pretty a
 
 ## Requirements
 * This bot uses ***Lavalink***. So it is required to run lavalink before runnig this bot.
-* Lavalink player configuration file is also needed. You can get that from [here](). Keep the ***application.yml*** in the ***Lavalink.jar*** root directory.
+* Lavalink player configuration file is also needed. You can get that from [here](https://github.com/BLAK3STORM/Singing_Chimken_Bot/tree/master/config). Keep the ***application.yml*** in the ***Lavalink.jar*** root directory.
 * ***Wavelink*** python module is also required to link the bot to the lavalink player. But all wavelink versions may not work. I recommend to use *wavelink v0.9*.
 Use the command below to install wavelink v0.9:  
 ```pip3 install wavelink<1```
