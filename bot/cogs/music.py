@@ -1,6 +1,7 @@
 # You can ignore all the commented out codes. They are all for eperimental purposes.
 
 #Imports
+from email.base64mime import body_encode
 import discord
 from discord.ext import commands
 import wavelink
@@ -12,6 +13,7 @@ import random
 # import time
 from enum import Enum
 import aiohttp
+import requests
 
 # Constants
 URL_REGEX = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
@@ -220,9 +222,40 @@ class Player(wavelink.Player):
         if not tracks:
             raise NoTracksFound
 
-        # For multiple tracks at a time
+        # For adding a playlist using link
         if isinstance(tracks, wavelink.TrackPlaylist):
             self.queue.add(*tracks.tracks)
+            # await ctx.reply(f"Added That playlist!"+"\n".join(i.title for i in self.queue.all_tracks))
+
+            dscrption = ""
+            i = 0
+
+            while len(dscrption) <= 2000 and i < len(self.queue.all_tracks):
+                dscrption += '**'+str(i+1)+"**. "+self.queue.all_tracks[i].title+'\n'
+                i += 1
+
+            if i < len(self.queue.all_tracks)-1:
+                t = dscrption
+                dscrption += f"and {str(len(self.queue.all_tracks)-(i+1))} more tracks..."
+                while i < len(self.queue.all_tracks):
+                    t += '**'+str(i+1)+"**. "+self.queue.all_tracks[i].title+'\n'
+                    i += 1
+
+                response = requests.post('http://hastebin.com/documents', data=t.encode('utf-8'))
+                #if response.status_code == 200:
+                dscrption += "\nWatch full playlist:\n"+"https://www.toptal.com/developers/hastebin/"+response.json()['key']
+
+            embed = discord.Embed(
+                title = "Playlist",
+                description = dscrption,
+                colour = ctx.author.colour,
+                timestamp = dt.datetime.utcnow()
+            )
+            embed.set_author(name=str(len(self.queue.all_tracks))+" tracks")
+            embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.avatar_url)
+
+            await ctx.reply("Playlist added! :fire: ",embed=embed)
+
         # For single track at a time
         elif len(tracks) == 1:
             self.queue.add(tracks[0])
@@ -235,10 +268,10 @@ class Player(wavelink.Player):
             # When a track is added using an url
             elif(track := await re.match(URL_REGEX, link)) is not None:
                 self.queue.add(track)
-                await ctx.reply(f"Added {track.title} to the queue")
+                await ctx.reply(f"Added {track.title} to the queue")               
 
         if not self.is_playing and not self.queue.is_empty:
-            await self.start_playback()
+            await self.start_playback() 
 
     # Track search result choice by reacting the message
     async def choose_track(self, ctx, tracks):
@@ -454,7 +487,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         else:
             query = query.strip("<>")
             if not re.match(URL_REGEX, query):
-                query = f"ytsearch:{query}"
+                if query.startswith("https://youtube.com/playlist") == False:
+                    query = f"ytsearch:{query}"
 
             await player.add_tracks(ctx, await self.wavelink.get_tracks(query))
 
@@ -654,7 +688,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             i += 1
 
         if i < len(player.queue.all_tracks)-1:
+            t = dscrption
             dscrption += f"and {str(len(player.queue.all_tracks)-(i+1))} more tracks..."
+            while i < len(player.queue.all_tracks):
+               t += '**'+str(i+1)+"**. "+player.queue.all_tracks[i].title+'\n'
+               i += 1
+
+            response = requests.post('http://hastebin.com/documents', data=t.encode('utf-8'))
+            #if response.status_code == 200:
+            dscrption += "\nWatch full playlist:\n"+"https://www.toptal.com/developers/hastebin/"+response.json()['key']
 
         embed = discord.Embed(
             title="Playlist",
